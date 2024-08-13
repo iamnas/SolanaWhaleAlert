@@ -11,9 +11,9 @@ export class AlertService implements OnModuleInit {
   onModuleInit() {
     this.bot = new TelegramBot(this.token, { polling: true });
 
-    this.bot.on('message', (msg) => {
-      this.bot.sendMessage(msg.chat.id, 'Whale Alert bot is running!');
-    });
+    // this.bot.on('message', (msg) => {
+    //   this.bot.sendMessage(msg.chat.id, 'Whale Alert bot is running!');
+    // });
   }
 
   constructor(private configService: ConfigService) {}

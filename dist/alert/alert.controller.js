@@ -16,8 +16,11 @@ exports.AlertController = void 0;
 const common_1 = require("@nestjs/common");
 const alert_service_1 = require("./alert.service");
 const config_1 = require("@nestjs/config");
+const bull_1 = require("@nestjs/bull");
+const bullmq_1 = require("bullmq");
 let AlertController = class AlertController {
-    constructor(alertService, configService) {
+    constructor(alertQueue, alertService, configService) {
+        this.alertQueue = alertQueue;
         this.alertService = alertService;
         this.configService = configService;
         this.tokenLogs = [];
@@ -25,7 +28,6 @@ let AlertController = class AlertController {
     }
     async handleWebhook(payload) {
         const signature = payload[0]?.signature;
-        console.log(this.tokenLogs);
         if (this.tokenLogs.includes(signature)) {
             return { message: 'Webhook already processed' };
         }
@@ -33,7 +35,13 @@ let AlertController = class AlertController {
         for (const transfer of tokenTransfers) {
             if (transfer.tokenAmount > this.THRESHOLD_AMOUNT &&
                 transfer.mint === this.configService.get('USDC_ADDRESS')) {
-                await this.alertService.sendWhaleAlert(signature, transfer.tokenAmount, transfer.fromUserAccount, transfer.toUserAccount, transfer.mint);
+                await this.alertQueue.add('sendWhaleAlert', {
+                    signature,
+                    amount: transfer.tokenAmount,
+                    from: transfer.fromUserAccount,
+                    to: transfer.toUserAccount,
+                    mint: transfer.mint,
+                });
                 this.tokenLogs.push(signature);
             }
         }
@@ -50,7 +58,9 @@ __decorate([
 ], AlertController.prototype, "handleWebhook", null);
 exports.AlertController = AlertController = __decorate([
     (0, common_1.Controller)('alert'),
-    __metadata("design:paramtypes", [alert_service_1.AlertService,
+    __param(0, (0, bull_1.InjectQueue)('alert-queue')),
+    __metadata("design:paramtypes", [bullmq_1.Queue,
+        alert_service_1.AlertService,
         config_1.ConfigService])
 ], AlertController);
 //# sourceMappingURL=alert.controller.js.map

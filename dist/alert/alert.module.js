@@ -10,13 +10,21 @@ exports.AlertModule = void 0;
 const common_1 = require("@nestjs/common");
 const alert_controller_1 = require("./alert.controller");
 const alert_service_1 = require("./alert.service");
+const alert_processor_1 = require("./alert.processor");
+const bull_1 = require("@nestjs/bull");
 let AlertModule = class AlertModule {
 };
 exports.AlertModule = AlertModule;
 exports.AlertModule = AlertModule = __decorate([
     (0, common_1.Module)({
+        imports: [
+            bull_1.BullModule.registerQueue({
+                name: 'alert-queue',
+            }),
+        ],
         controllers: [alert_controller_1.AlertController],
-        providers: [alert_service_1.AlertService]
+        providers: [alert_processor_1.AlertProcessor, alert_service_1.AlertService],
+        exports: [alert_service_1.AlertService],
     })
 ], AlertModule);
 //# sourceMappingURL=alert.module.js.map

@@ -12,15 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AlertService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
-const TelegramBot = require("node-telegram-bot-api");
+const telegraf_1 = require("telegraf");
 let AlertService = class AlertService {
-    onModuleInit() {
-        this.bot = new TelegramBot(this.token, { polling: true });
-    }
     constructor(configService) {
         this.configService = configService;
-        this.chatId = this.configService.get('CHATID');
-        this.token = this.configService.get('TELEGRAM_TOKEN');
+        this.lastAlertMessage = [];
+        this.bot = new telegraf_1.Telegraf(this.configService.get('TELEGRAM_TOKEN'));
     }
     async sendWhaleAlert(signature, amount, from, to, mint) {
         const message = `
@@ -39,9 +36,14 @@ let AlertService = class AlertService {
 👥 *Join our Telegram group*: [@whalealert](https://t.me/whalealert)
 💡 
 `;
-        await this.bot.sendMessage(this.chatId, message, {
+        this.lastAlertMessage.push(message);
+        await this.bot.telegram.sendMessage(this.configService.get('CHATID'), message, {
             parse_mode: 'Markdown',
         });
+    }
+    async sendLastAlert() {
+        return (this.lastAlertMessage[this.lastAlertMessage.length - 1] ||
+            'No alerts available.');
     }
 };
 exports.AlertService = AlertService;

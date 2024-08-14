@@ -12,14 +12,30 @@ const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const alert_module_1 = require("./alert/alert.module");
 const config_1 = require("@nestjs/config");
+const wallet_module_1 = require("./wallet/wallet.module");
+const bot_service_1 = require("./bot/bot.service");
+const bull_1 = require("@nestjs/bull");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [alert_module_1.AlertModule, config_1.ConfigModule.forRoot({ isGlobal: true })],
+        imports: [
+            bull_1.BullModule.forRoot({
+                redis: {
+                    host: 'localhost',
+                    port: 6379,
+                },
+            }),
+            bull_1.BullModule.registerQueue({
+                name: 'alert-queue',
+            }),
+            alert_module_1.AlertModule,
+            config_1.ConfigModule.forRoot({ isGlobal: true }),
+            wallet_module_1.WalletModule,
+        ],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        providers: [app_service_1.AppService, bot_service_1.BotService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

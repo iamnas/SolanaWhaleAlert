@@ -1,22 +1,15 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as TelegramBot from 'node-telegram-bot-api';
+import { Telegraf } from 'telegraf';
 
 @Injectable()
-export class AlertService implements OnModuleInit {
-  private bot: TelegramBot;
-  private readonly chatId = this.configService.get('CHATID');
-  private readonly token = this.configService.get('TELEGRAM_TOKEN');
+export class AlertService {
+  private bot: Telegraf;
+  private lastAlertMessage: string[] = [];
 
-  onModuleInit() {
-    this.bot = new TelegramBot(this.token, { polling: true });
-
-    // this.bot.on('message', (msg) => {
-    //   this.bot.sendMessage(msg.chat.id, 'Whale Alert bot is running!');
-    // });
+  constructor(private configService: ConfigService) {
+    this.bot = new Telegraf(this.configService.get('TELEGRAM_TOKEN'));
   }
-
-  constructor(private configService: ConfigService) {}
 
   async sendWhaleAlert(
     signature: string,
@@ -42,8 +35,21 @@ export class AlertService implements OnModuleInit {
 💡 
 `;
 
-    await this.bot.sendMessage(this.chatId, message, {
-      parse_mode: 'Markdown',
-    });
+    this.lastAlertMessage.push(message);
+    // await this.botService.sendWhaleAlert(message);
+    await this.bot.telegram.sendMessage(
+      this.configService.get('CHATID'),
+      message,
+      {
+        parse_mode: 'Markdown',
+      },
+    );
+  }
+
+  async sendLastAlert() {
+    return (
+      this.lastAlertMessage[this.lastAlertMessage.length - 1] ||
+      'No alerts available.'
+    );
   }
 }

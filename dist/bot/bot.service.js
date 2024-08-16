@@ -37,9 +37,9 @@ let BotService = class BotService {
                 ],
                 [
                     telegraf_2.Markup.button.callback('Whale Alerts 🐋', 'whalealerts'),
-                    telegraf_2.Markup.button.callback('Help 💡', 'help'),
+                    telegraf_2.Markup.button.callback('💼 Wallet Portfolio 👜', 'portfolio'),
                 ],
-                [telegraf_2.Markup.button.callback('💼 Wallet Portfolio 👜', 'portfolio')],
+                [telegraf_2.Markup.button.callback('Help 💡', 'help')],
             ]));
         });
         const helpMessage = `Here are all the commands you can use:
@@ -53,7 +53,7 @@ let BotService = class BotService {
 
   Stay tuned for more updates! 🚀`;
         const helpKeyboard = telegraf_2.Markup.keyboard([
-            ['📈 top10', '🆕 newlistings'],
+            ['📈 top10', 'New Listings 🆕'],
             ['🔍 tokeninfo [address]', '📊 tokenstats [address]'],
             ['🐋 whalealerts', '💼 Wallet Portfolio 👜'],
             ['💡 help'],

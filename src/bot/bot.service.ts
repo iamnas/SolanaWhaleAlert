@@ -35,9 +35,9 @@ export class BotService {
 
           [
             Markup.button.callback('Whale Alerts 🐋', 'whalealerts'),
-            Markup.button.callback('Help 💡', 'help'),
+            Markup.button.callback('💼 Wallet Portfolio 👜', 'portfolio'),
           ],
-          [Markup.button.callback('💼 Wallet Portfolio 👜', 'portfolio')],
+          [Markup.button.callback('Help 💡', 'help')],
         ]),
       );
     });
@@ -55,7 +55,7 @@ export class BotService {
 
     // Define the keyboard layout
     const helpKeyboard = Markup.keyboard([
-      ['📈 top10', '🆕 newlistings'],
+      ['📈 top10', 'New Listings 🆕'],
       ['🔍 tokeninfo [address]', '📊 tokenstats [address]'],
       ['🐋 whalealerts', '💼 Wallet Portfolio 👜'],
       ['💡 help'],

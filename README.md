@@ -1,73 +1,91 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Solana Whale Alert Bot
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A Telegram bot built with NestJS and Telegraf for tracking and alerting about major token movements, whale activities, and other Solana blockchain updates.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **/start** - Welcome message and list of available commands
+- **/top10** - Get the top 10 tokens by market cap and trading volume
+- **/newlistings** - Get newly listed tokens on Solana
+- **/whalealerts** - Receive alerts for major token movements and whale activity
+- **/createwallet** - Create a new wallet address on Solana
+- **/tokeninfo [address]** - Get detailed information about a specific token by its address
+- **/help** - Get a list of all available commands
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Prerequisites
+
+Before running the bot, make sure you have the following:
+
+- Node.js installed
+- A Telegram bot token from [BotFather](https://core.telegram.org/bots#botfather)
+- A BirdEye API key for fetching Solana token data
 
 ## Installation
 
-```bash
-$ npm install
-```
+1. Clone the repository:
 
-## Running the app
+   ```bash
+   git clone https://github.com/iamnas/SolanaWhaleAlert.git
+   cd SolanaWhaleAlert
+   ```
 
-```bash
-# development
-$ npm run start
+2. Install the dependencies:
 
-# watch mode
-$ npm run start:dev
+   ```bash
+   npm install
+   ```
 
-# production mode
-$ npm run start:prod
-```
+3. Set up your environment variables by creating a `.env` file in the root directory:
 
-## Test
+   ```bash
+   touch .env
+   ```
 
-```bash
-# unit tests
-$ npm run test
+4. Add the following configuration to your `.env` file:
 
-# e2e tests
-$ npm run test:e2e
+   ```plaintext
+   # Telegram Bot Configuration
+   CHATID=your-telegram-chat-id
+   TELEGRAM_TOKEN=your-telegram-bot-token
 
-# test coverage
-$ npm run test:cov
-```
+   # Solana and USDC Configuration
+   USDC_ADDRESS=your-usdc-token-address
+   THRESHOLD_AMOUNT=1000 # Set your desired threshold amount
 
-## Support
+   # BirdEye API Configuration
+   BIRDEYE_API_KEY=your-birdeye-api-key
+   BIRDEYE_URL=https://api.birdeye.so
+   BIRDEYE_TOP_TOKEN_URL=https://api.birdeye.so/top-tokens
+   BIRDEYE_NEW_LIST_URL=https://api.birdeye.so/new-listings
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+   # Webhook Configuration
+   setWebhook=your-webhook-url
+   ```
 
-## Stay in touch
+   Replace the placeholders with your actual values.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+5. Run the bot:
+
+   ```bash
+   npm run start
+   ```
+
+## Usage
+
+Once the bot is running, you can use the following commands in your Telegram chat:
+
+- **/start**: Displays a welcome message and a list of available commands.
+- **/top10**: Fetches the top 10 tokens by market cap and trading volume.
+- **/newlistings**: Retrieves newly listed tokens on Solana.
+- **/whalealerts**: Provides alerts for major token movements and whale activity.
+- **/createwallet**: Generates a new wallet address on Solana.
+- **/tokeninfo [address]**: Fetches detailed information about a specific token using its address.
+- **/help**: Lists all available commands with a brief description.
+
+## Contributing
+
+Feel free to submit issues or pull requests if you find bugs or have suggestions for improvements.
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

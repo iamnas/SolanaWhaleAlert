@@ -5,6 +5,7 @@ import { WalletService } from 'src/wallet/wallet.service';
 import { Context, Telegraf } from 'telegraf';
 import { Markup } from 'telegraf';
 import { PublicKey } from '@solana/web3.js';
+// import axios from 'axios';
 
 @Injectable()
 export class BotService {
@@ -28,37 +29,42 @@ export class BotService {
             Markup.button.callback('New Listings 🆕', 'newlistings'),
           ],
 
-          [
-            Markup.button.callback('Token Info 🔍', 'tokeninfo'),
-            Markup.button.callback('Token Stats 📊', 'tokenstats'),
-          ],
+          // [
+          //   Markup.button.callback('💼 Wallet Portfolio 👜', 'portfolio'),
+          //   Markup.button.callback('Token Info 🔍', 'tokeninfo'),
+          // ],
 
           [
             Markup.button.callback('Whale Alerts 🐋', 'whalealerts'),
-            Markup.button.callback('💼 Wallet Portfolio 👜', 'portfolio'),
+            Markup.button.callback('Create Wallet 🏦', 'createwallet'),
           ],
-          [Markup.button.callback('Help 💡', 'help')],
+          [
+            Markup.button.callback('Token Info 🔍', 'tokeninfo'),
+            Markup.button.callback('Help 💡', 'help'),
+          ],
         ]),
       );
     });
 
+    // /portfolio [wallet] - Get the top tokens of the specified wallet
     const helpMessage = `Here are all the commands you can use:
+  /start - Welcome message and list of available commands
   /top10 - Get the top 10 tokens by market cap and trading volume
   /newlistings - Get newly listed tokens on Solana
-  /tokeninfo [address] - Get detailed information about a specific token by its address
-  /tokenstats [address] - Get detailed token performance stats by its address
+  /createwallet - Create a new wallet address on Solana
   /whalealerts - Get whale alerts for major token movements
-  /portfolio [wallet] - Get the top tokens of the specified wallet
+  /tokeninfo [address] - Get detailed information about a specific token by its address
   /help - Show this help message
 
   Stay tuned for more updates! 🚀`;
 
+    // '💼 Wallet Portfolio 👜',
+    // ['🔍 tokeninfo [address]'],
     // Define the keyboard layout
     const helpKeyboard = Markup.keyboard([
       ['📈 top10', 'New Listings 🆕'],
-      ['🔍 tokeninfo [address]', '📊 tokenstats [address]'],
-      ['🐋 whalealerts', '💼 Wallet Portfolio 👜'],
-      ['💡 help'],
+      ['🐋 whalealerts', 'Create Wallet 🏦'],
+      ['🔍 tokeninfo [address]', '💡 help'],
     ])
       .resize()
       .oneTime();
@@ -83,16 +89,21 @@ export class BotService {
       ctx.reply(message, { parse_mode: 'Markdown' });
     };
 
-    const sendWalletPortfolio = async (ctx: Context, wallet: string) => {
-      const message = await this.walletService.getWalletPortfolio(wallet);
+    // const sendWalletPortfolio = async (ctx: Context, wallet: string) => {
+    //   const message = await this.walletService.getWalletPortfolio(wallet);
+    //   ctx.reply(message, { parse_mode: 'Markdown' });
+    // };
+
+    const sendTokenInformation = async (ctx: Context, tokenAddress: string) => {
+      const message =
+        await this.walletService.getTokenInformation(tokenAddress);
       ctx.reply(message, { parse_mode: 'Markdown' });
     };
 
-    //
-
-    // this.bot.command('tokeninfo', (ctx) => {
-    //   // Your logic to handle /tokeninfo command
-    // });
+    const sendCreateNewSolanaAddress = async (ctx: Context) => {
+      const message = await this.walletService.createNewSolanaAddress();
+      ctx.reply(message, { parse_mode: 'Markdown' });
+    };
 
     // this.bot.command('tokenstats', (ctx) => {
     //   // Your logic to handle /tokenstats command
@@ -155,158 +166,137 @@ export class BotService {
       ctx.deleteMessage();
     });
 
-    this.bot.command('portfolio', (ctx) => {
-      ctx.reply('Please enter your wallet address:');
-      // Listen for the user's next message, which should be the wallet address
-      this.bot.on('text', async (ctx) => {
-        const walletAddress = ctx.message.text;
+    // this.bot.command('portfolio', (ctx) => {
+    //   ctx.reply('Please enter your wallet address:');
+    //   // Listen for the user's next message, which should be the wallet address
+    //   this.bot.on('text', async (ctx) => {
+    //     const walletAddress = ctx.message.text;
 
-        // Validate the wallet address format if necessary
-        if (!this.isValidAddress(walletAddress)) {
-          ctx.reply(
-            'The wallet address provided is not valid. Please try again.',
-          );
-          return;
-        }
+    //     // Validate the wallet address format if necessary
+    //     if (!this.isValidAddress(walletAddress)) {
+    //       ctx.reply(
+    //         'The wallet address provided is not valid. Please try again.',
+    //       );
+    //       return;
+    //     }
 
-        // Call the API with the provided wallet address
-        try {
-          await sendWalletPortfolio(ctx, walletAddress);
+    //     // Call the API with the provided wallet address
+    //     try {
+    //       await sendWalletPortfolio(ctx, walletAddress);
 
-          // Send the portfolio details to the user
-          //   ctx.reply(`Here are the top tokens in your wallet:\n${portfolio}`);
-        } catch (error) {
-          ctx.reply(
-            'An error occurred while fetching your portfolio. Please try again later.',
-          );
-        }
-      });
-    });
+    //       // Send the portfolio details to the user
+    //       //   ctx.reply(`Here are the top tokens in your wallet:\n${portfolio}`);
+    //     } catch (error) {
+    //       ctx.reply(
+    //         'An error occurred while fetching your portfolio. Please try again later.',
+    //       );
+    //     }
+    //   });
+    // });
 
-    this.bot.action('portfolio', (ctx) => {
-      ctx.reply('Please enter your wallet address:');
-      // Listen for the user's next message, which should be the wallet address
-      this.bot.on('text', async (ctx) => {
-        const walletAddress = ctx.message.text;
+    // this.bot.action('portfolio', (ctx) => {
+    //   ctx.reply('Please enter your wallet address:');
+    //   // Listen for the user's next message, which should be the wallet address
+    //   this.bot.on('text', async (ctx) => {
+    //     const walletAddress = ctx.message.text;
 
-        // Validate the wallet address format if necessary
-        if (!this.isValidAddress(walletAddress)) {
-          ctx.reply(
-            'The wallet address provided is not valid. Please try again.',
-          );
-          return;
-        }
+    //     // Validate the wallet address format if necessary
+    //     if (!this.isValidAddress(walletAddress)) {
+    //       ctx.reply(
+    //         'The wallet address provided is not valid. Please try again.',
+    //       );
+    //       return;
+    //     }
 
-        // Call the API with the provided wallet address
-        try {
-          await sendWalletPortfolio(ctx, walletAddress);
-          ctx.answerCbQuery();
-          // Send the portfolio details to the user
-          //   ctx.reply(`Here are the top tokens in your wallet:\n${portfolio}`);
-        } catch (error) {
-          ctx.reply(
-            'An error occurred while fetching your portfolio. Please try again later.',
-          );
-        }
-      });
-    });
+    //     // Call the API with the provided wallet address
+    //     try {
+    //       await sendWalletPortfolio(ctx, walletAddress);
+    //       await ctx.answerCbQuery();
 
-    this.bot.hears('💼 Wallet Portfolio 👜', (ctx) => {
-      ctx.reply('Please enter your wallet address:');
-      // Listen for the user's next message, which should be the wallet address
-      this.bot.on('text', async (ctx) => {
-        const walletAddress = ctx.message.text;
+    //       // Send the portfolio details to the user
+    //       //   ctx.reply(`Here are the top tokens in your wallet:\n${portfolio}`);
+    //     } catch (error) {
+    //       ctx.reply(
+    //         'An error occurred while fetching your portfolio. Please try again later.',
+    //       );
+    //     }
+    //   });
+    // });
 
-        // Validate the wallet address format if necessary
-        if (!this.isValidAddress(walletAddress)) {
-          ctx.reply(
-            'The wallet address provided is not valid. Please try again.',
-          );
-          return;
-        }
+    // this.bot.hears('💼 Wallet Portfolio 👜', (ctx) => {
+    //   ctx.reply('Please enter your wallet address:');
+    //   // Listen for the user's next message, which should be the wallet address
+    //   this.bot.on('text', async (ctx) => {
+    //     const walletAddress = ctx.message.text;
 
-        // Call the API with the provided wallet address
-        try {
-          await sendWalletPortfolio(ctx, walletAddress);
+    //     // Validate the wallet address format if necessary
+    //     if (!this.isValidAddress(walletAddress)) {
+    //       ctx.reply(
+    //         'The wallet address provided is not valid. Please try again.',
+    //       );
+    //       return;
+    //     }
 
-          // Send the portfolio details to the user
-          //   ctx.reply(`Here are the top tokens in your wallet:\n${portfolio}`);
-        } catch (error) {
-          ctx.reply(
-            'An error occurred while fetching your portfolio. Please try again later.',
-          );
-        }
-      });
-    });
+    //     // Call the API with the provided wallet address
+    //     try {
+    //       await sendWalletPortfolio(ctx, walletAddress);
+    //       // ctx.deleteMessage();
+
+    //       // Send the portfolio details to the user
+    //       //   ctx.reply(`Here are the top tokens in your wallet:\n${portfolio}`);
+    //     } catch (error) {
+    //       ctx.reply(
+    //         'An error occurred while fetching your portfolio. Please try again later.',
+    //       );
+    //     }
+    //   });
+    // });
 
     this.bot.command('tokeninfo', async (ctx) => {
-      const tokenAddress = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'; // Replace with actual token address if dynamic
-      const url = `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`;
+      ctx.reply('Please enter your token address');
+      this.bot.on('text', async (ctx) => {
+        const tokenAddress = ctx.message.text;
+        sendTokenInformation(ctx, tokenAddress);
+      });
+    });
 
+    this.bot.action('tokeninfo', async (ctx) => {
+      ctx.reply('Please enter your token address');
       try {
-        const response = await fetch(url);
-        const data = await response.json();
-        const dexId = 'raydium';
-        const pair =
-          data?.pairs.length > 1
-            ? data?.pairs.find((pair) => pair.dexId === dexId)
-            : data?.pairs[0];
-        //     console.log(pair);
-
-        const {
-          baseToken,
-          quoteToken,
-          priceUsd,
-          txns,
-          volume,
-          priceChange,
-          liquidity,
-          fdv,
-          info,
-        } = pair;
-
-        const message = `
-        📊 *Token Information for ${baseToken.name} (${baseToken.symbol})*
-
-        🔗 *Pair Address:* [${pair.pairAddress}](${pair.url})
-        💰 *Price:* $${parseFloat(priceUsd).toFixed(6)} / ${parseFloat(pair.priceNative).toFixed(8)} ${quoteToken.symbol}
-
-        📈 *Price Change:*
-        - Last 5 mins: ${priceChange.m5}%
-        - Last 1 hour: ${priceChange.h1}%
-        - Last 6 hours: ${priceChange.h6}%
-        - Last 24 hours: ${priceChange.h24}%
-
-        📊 *Transactions:*
-        - 5 min: ${txns.m5.buys} buys, ${txns.m5.sells} sells
-        - 1 hour: ${txns.h1.buys} buys, ${txns.h1.sells} sells
-        - 24 hours: ${txns.h24.buys} buys, ${txns.h24.sells} sells
-
-        💵 *Volume (24h):* ${volume.h24.toLocaleString()} USD
-        💧 *Liquidity:*
-        - Total: $${parseFloat(liquidity.usd).toLocaleString()}
-        - Base: ${parseFloat(liquidity.base).toLocaleString()} ${baseToken.symbol}
-        - Quote: ${parseFloat(liquidity.quote).toFixed(4)} ${quoteToken.symbol}
-
-        🏦 *Fully Diluted Valuation (FDV):* $${fdv.toLocaleString()}
-
-       🌐 *Links:*
-         - [Website](${info?.websites[0]?.url})
-        - [Twitter](${info?.socials?.find((s) => s.type === 'twitter')?.url})
-        - [Telegram](${info?.socials?.find((s) => s.type === 'telegram')?.url})
-
-        🖼️ *Token Image:* [View Image](${info.imageUrl})
-                `;
-
-        ctx.reply(message, { parse_mode: 'Markdown' });
+        this.bot.on('text', async (ctx) => {
+          const tokenAddress = ctx.message.text;
+          await sendTokenInformation(ctx, tokenAddress);
+        });
+        ctx.answerCbQuery();
       } catch (error) {
-        console.error('Error fetching token data:', error);
         ctx.reply(
-          'Sorry, I could not retrieve the token information at this time.',
+          'An error occurred while fetching your portfolio. Please try again later.',
         );
       }
     });
 
+    this.bot.hears('🔍 tokeninfo [address]', async (ctx) => {
+      ctx.reply('Please enter your token address');
+      this.bot.on('text', async (ctx) => {
+        const tokenAddress = ctx.message.text;
+        sendTokenInformation(ctx, tokenAddress);
+        // ctx.deleteMessage();
+      });
+    });
+
+    this.bot.command('createwallet', async (ctx) => {
+      sendCreateNewSolanaAddress(ctx);
+    });
+
+    this.bot.action('createwallet', async (ctx) => {
+      sendCreateNewSolanaAddress(ctx);
+      ctx.answerCbQuery();
+    });
+
+    this.bot.hears('Create Wallet 🏦', async (ctx) => {
+      sendCreateNewSolanaAddress(ctx);
+      ctx.deleteMessage();
+    });
     this.bot.launch();
   }
 

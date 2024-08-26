@@ -28,6 +28,9 @@ let WalletController = class WalletController {
     async getNewListings() {
         return this.walletService.getNewListings();
     }
+    async createNewSolanaAddress() {
+        return this.walletService.createNewSolanaAddress();
+    }
 };
 exports.WalletController = WalletController;
 __decorate([
@@ -49,6 +52,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], WalletController.prototype, "getNewListings", null);
+__decorate([
+    (0, common_1.Get)('createNewSolanaAddress'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], WalletController.prototype, "createNewSolanaAddress", null);
 exports.WalletController = WalletController = __decorate([
     (0, common_1.Controller)('wallet'),
     __metadata("design:paramtypes", [wallet_service_1.WalletService])

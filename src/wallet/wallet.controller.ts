@@ -18,4 +18,9 @@ export class WalletController {
   async getNewListings() {
     return this.walletService.getNewListings();
   }
+
+  @Get('createNewSolanaAddress')
+  async createNewSolanaAddress() {
+    return this.walletService.createNewSolanaAddress();
+  }
 }

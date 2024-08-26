@@ -32,31 +32,29 @@ let BotService = class BotService {
                     telegraf_2.Markup.button.callback('New Listings 🆕', 'newlistings'),
                 ],
                 [
-                    telegraf_2.Markup.button.callback('Token Info 🔍', 'tokeninfo'),
-                    telegraf_2.Markup.button.callback('Token Stats 📊', 'tokenstats'),
+                    telegraf_2.Markup.button.callback('Whale Alerts 🐋', 'whalealerts'),
+                    telegraf_2.Markup.button.callback('Create Wallet 🏦', 'createwallet'),
                 ],
                 [
-                    telegraf_2.Markup.button.callback('Whale Alerts 🐋', 'whalealerts'),
-                    telegraf_2.Markup.button.callback('💼 Wallet Portfolio 👜', 'portfolio'),
+                    telegraf_2.Markup.button.callback('Token Info 🔍', 'tokeninfo'),
+                    telegraf_2.Markup.button.callback('Help 💡', 'help'),
                 ],
-                [telegraf_2.Markup.button.callback('Help 💡', 'help')],
             ]));
         });
         const helpMessage = `Here are all the commands you can use:
+  /start - Welcome message and list of available commands
   /top10 - Get the top 10 tokens by market cap and trading volume
   /newlistings - Get newly listed tokens on Solana
-  /tokeninfo [address] - Get detailed information about a specific token by its address
-  /tokenstats [address] - Get detailed token performance stats by its address
+  /createwallet - Create a new wallet address on Solana
   /whalealerts - Get whale alerts for major token movements
-  /portfolio [wallet] - Get the top tokens of the specified wallet
+  /tokeninfo [address] - Get detailed information about a specific token by its address
   /help - Show this help message
 
   Stay tuned for more updates! 🚀`;
         const helpKeyboard = telegraf_2.Markup.keyboard([
             ['📈 top10', 'New Listings 🆕'],
-            ['🔍 tokeninfo [address]', '📊 tokenstats [address]'],
-            ['🐋 whalealerts', '💼 Wallet Portfolio 👜'],
-            ['💡 help'],
+            ['🐋 whalealerts', 'Create Wallet 🏦'],
+            ['🔍 tokeninfo [address]', '💡 help'],
         ])
             .resize()
             .oneTime();
@@ -75,8 +73,12 @@ let BotService = class BotService {
             const message = await this.walletService.getNewListings();
             ctx.reply(message, { parse_mode: 'Markdown' });
         };
-        const sendWalletPortfolio = async (ctx, wallet) => {
-            const message = await this.walletService.getWalletPortfolio(wallet);
+        const sendTokenInformation = async (ctx, tokenAddress) => {
+            const message = await this.walletService.getTokenInformation(tokenAddress);
+            ctx.reply(message, { parse_mode: 'Markdown' });
+        };
+        const sendCreateNewSolanaAddress = async (ctx) => {
+            const message = await this.walletService.createNewSolanaAddress();
             ctx.reply(message, { parse_mode: 'Markdown' });
         };
         this.bot.command('help', sendHelpMessage);
@@ -121,104 +123,43 @@ let BotService = class BotService {
             sendNewlistings(ctx);
             ctx.deleteMessage();
         });
-        this.bot.command('portfolio', (ctx) => {
-            ctx.reply('Please enter your wallet address:');
-            this.bot.on('text', async (ctx) => {
-                const walletAddress = ctx.message.text;
-                if (!this.isValidAddress(walletAddress)) {
-                    ctx.reply('The wallet address provided is not valid. Please try again.');
-                    return;
-                }
-                try {
-                    await sendWalletPortfolio(ctx, walletAddress);
-                }
-                catch (error) {
-                    ctx.reply('An error occurred while fetching your portfolio. Please try again later.');
-                }
-            });
-        });
-        this.bot.action('portfolio', (ctx) => {
-            ctx.reply('Please enter your wallet address:');
-            this.bot.on('text', async (ctx) => {
-                const walletAddress = ctx.message.text;
-                if (!this.isValidAddress(walletAddress)) {
-                    ctx.reply('The wallet address provided is not valid. Please try again.');
-                    return;
-                }
-                try {
-                    await sendWalletPortfolio(ctx, walletAddress);
-                    ctx.answerCbQuery();
-                }
-                catch (error) {
-                    ctx.reply('An error occurred while fetching your portfolio. Please try again later.');
-                }
-            });
-        });
-        this.bot.hears('💼 Wallet Portfolio 👜', (ctx) => {
-            ctx.reply('Please enter your wallet address:');
-            this.bot.on('text', async (ctx) => {
-                const walletAddress = ctx.message.text;
-                if (!this.isValidAddress(walletAddress)) {
-                    ctx.reply('The wallet address provided is not valid. Please try again.');
-                    return;
-                }
-                try {
-                    await sendWalletPortfolio(ctx, walletAddress);
-                }
-                catch (error) {
-                    ctx.reply('An error occurred while fetching your portfolio. Please try again later.');
-                }
-            });
-        });
         this.bot.command('tokeninfo', async (ctx) => {
-            const tokenAddress = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-            const url = `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`;
+            ctx.reply('Please enter your token address');
+            this.bot.on('text', async (ctx) => {
+                const tokenAddress = ctx.message.text;
+                sendTokenInformation(ctx, tokenAddress);
+            });
+        });
+        this.bot.action('tokeninfo', async (ctx) => {
+            ctx.reply('Please enter your token address');
             try {
-                const response = await fetch(url);
-                const data = await response.json();
-                const dexId = 'raydium';
-                const pair = data?.pairs.length > 1
-                    ? data?.pairs.find((pair) => pair.dexId === dexId)
-                    : data?.pairs[0];
-                const { baseToken, quoteToken, priceUsd, txns, volume, priceChange, liquidity, fdv, info, } = pair;
-                const message = `
-        📊 *Token Information for ${baseToken.name} (${baseToken.symbol})*
-
-        🔗 *Pair Address:* [${pair.pairAddress}](${pair.url})
-        💰 *Price:* $${parseFloat(priceUsd).toFixed(6)} / ${parseFloat(pair.priceNative).toFixed(8)} ${quoteToken.symbol}
-
-        📈 *Price Change:*
-        - Last 5 mins: ${priceChange.m5}%
-        - Last 1 hour: ${priceChange.h1}%
-        - Last 6 hours: ${priceChange.h6}%
-        - Last 24 hours: ${priceChange.h24}%
-
-        📊 *Transactions:*
-        - 5 min: ${txns.m5.buys} buys, ${txns.m5.sells} sells
-        - 1 hour: ${txns.h1.buys} buys, ${txns.h1.sells} sells
-        - 24 hours: ${txns.h24.buys} buys, ${txns.h24.sells} sells
-
-        💵 *Volume (24h):* ${volume.h24.toLocaleString()} USD
-        💧 *Liquidity:*
-        - Total: $${parseFloat(liquidity.usd).toLocaleString()}
-        - Base: ${parseFloat(liquidity.base).toLocaleString()} ${baseToken.symbol}
-        - Quote: ${parseFloat(liquidity.quote).toFixed(4)} ${quoteToken.symbol}
-
-        🏦 *Fully Diluted Valuation (FDV):* $${fdv.toLocaleString()}
-
-       🌐 *Links:*
-         - [Website](${info?.websites[0]?.url})
-        - [Twitter](${info?.socials?.find((s) => s.type === 'twitter')?.url})
-        - [Telegram](${info?.socials?.find((s) => s.type === 'telegram')?.url})
-
-        🖼️ *Token Image:* [View Image](${info.imageUrl})
-                `;
-                ctx.reply(message, { parse_mode: 'Markdown' });
+                this.bot.on('text', async (ctx) => {
+                    const tokenAddress = ctx.message.text;
+                    await sendTokenInformation(ctx, tokenAddress);
+                });
+                ctx.answerCbQuery();
             }
             catch (error) {
-                console.error('Error fetching token data:', error);
-                ctx.reply('Sorry, I could not retrieve the token information at this time.');
+                ctx.reply('An error occurred while fetching your portfolio. Please try again later.');
             }
+        });
+        this.bot.hears('🔍 tokeninfo [address]', async (ctx) => {
+            ctx.reply('Please enter your token address');
+            this.bot.on('text', async (ctx) => {
+                const tokenAddress = ctx.message.text;
+                sendTokenInformation(ctx, tokenAddress);
+            });
+        });
+        this.bot.command('createwallet', async (ctx) => {
+            sendCreateNewSolanaAddress(ctx);
+        });
+        this.bot.action('createwallet', async (ctx) => {
+            sendCreateNewSolanaAddress(ctx);
+            ctx.answerCbQuery();
+        });
+        this.bot.hears('Create Wallet 🏦', async (ctx) => {
+            sendCreateNewSolanaAddress(ctx);
+            ctx.deleteMessage();
         });
         this.bot.launch();
     }

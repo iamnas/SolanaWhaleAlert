@@ -5,6 +5,8 @@ export declare class WalletService {
     private configService;
     constructor(httpService: HttpService, configService: ConfigService);
     getWalletPortfolio(wallet: string): Promise<string>;
-    getTopToken(): Promise<any>;
-    getNewListings(): Promise<any>;
+    getTopToken(): Promise<string>;
+    getNewListings(): Promise<string>;
+    getTokenInformation(tokenAddress: string): Promise<string>;
+    createNewSolanaAddress(): Promise<string>;
 }

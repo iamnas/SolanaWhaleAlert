@@ -95,9 +95,20 @@ export class BotService {
     // };
 
     const sendTokenInformation = async (ctx: Context, tokenAddress: string) => {
-      const message =
+      const sections =
         await this.walletService.getTokenInformation(tokenAddress);
-      ctx.reply(message, { parse_mode: 'Markdown' });
+      // for (const section of sections) {
+      //   if (section.length > 4096) {
+      //     // You may need to further split sections if any section exceeds the limit
+      //     const chunks = section.match(/.{1,4000}/g); // Split into chunks of 4000 characters
+      //     for (const chunk of chunks) {
+      //       await ctx.reply(chunk, { parse_mode: 'Markdown' });
+      //     }
+      //   } else {
+      //     await ctx.reply(section, { parse_mode: 'Markdown' });
+      //   }
+      // }
+      ctx.reply(sections, { parse_mode: 'Markdown' });
     };
 
     const sendCreateNewSolanaAddress = async (ctx: Context) => {

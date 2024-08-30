@@ -120,9 +120,9 @@ let WalletService = class WalletService {
             const tokenPriceData = await axios_2.default.get(`https://price.jup.ag/v4/price?ids=${tokenAddress}`);
             const tokenPrice = tokenPriceData?.data?.data[tokenAddress].price || 0;
             const markets = data.markets
+                .slice(0, 5)
                 .map((market) => {
-                return (`\n\n` +
-                    `📈 *Market:* ${market?.marketType?.toUpperCase().replace(/_/g, '\\_')}\n` +
+                return (`📈 *Market:* ${market?.marketType?.toUpperCase().replace(/_/g, '\\_')}\n` +
                     `💧 *LP Mint:* \`${market?.lp?.lpMint}\`\n` +
                     `💰 *Liquidity:* \`$${(market?.lp?.quoteUSD + market?.lp?.baseUSD).toLocaleString()}\`\n` +
                     `🔒 *LP Locked:* \`${market?.lp?.lpLockedPct?.toFixed(2)}%\``);
@@ -151,12 +151,11 @@ let WalletService = class WalletService {
                 return `⚠️ *${risk.level.toUpperCase()}*: ${risk.name} - ${risk.description}`;
             })
                 .join('\n');
-            const message = `\n ${tokenOverview}\n\n📊 *Markets* ${markets}\n\n👥 *Top Holders* (${totalTopHoldersPct.toFixed(2)}%) \n` +
-                `\n${topHolders}` +
-                `\n🔍 *Risk Analysis* \n` +
-                `📊 *Status:* *${data.score}*    ${riskLevel} \n` +
-                `\`${riskAnalysis}\` \n`;
-            return message;
+            const sections = `\n ${tokenOverview}` +
+                `\n\n📊 *Markets* \n${markets}` +
+                `\n\n👥 *Top Holders* (${totalTopHoldersPct.toFixed(2)}%) \n${topHolders}` +
+                `\n🔍 *Risk Analysis* \n📊 *Status:* *${data.score}* ${riskLevel} \n\`${riskAnalysis}\``;
+            return sections;
         }
         catch (error) {
             console.error('Error fetching token info:', error);

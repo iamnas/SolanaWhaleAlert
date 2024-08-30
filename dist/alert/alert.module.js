@@ -8,7 +8,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AlertModule = void 0;
 const common_1 = require("@nestjs/common");
-const alert_controller_1 = require("./alert.controller");
 const alert_service_1 = require("./alert.service");
 const alert_processor_1 = require("./alert.processor");
 const bull_1 = require("@nestjs/bull");
@@ -22,7 +21,6 @@ exports.AlertModule = AlertModule = __decorate([
                 name: 'alert-queue',
             }),
         ],
-        controllers: [alert_controller_1.AlertController],
         providers: [alert_processor_1.AlertProcessor, alert_service_1.AlertService],
         exports: [alert_service_1.AlertService],
     })

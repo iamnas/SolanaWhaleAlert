@@ -74,8 +74,8 @@ let BotService = class BotService {
             ctx.reply(message, { parse_mode: 'Markdown' });
         };
         const sendTokenInformation = async (ctx, tokenAddress) => {
-            const message = await this.walletService.getTokenInformation(tokenAddress);
-            ctx.reply(message, { parse_mode: 'Markdown' });
+            const sections = await this.walletService.getTokenInformation(tokenAddress);
+            ctx.reply(sections, { parse_mode: 'Markdown' });
         };
         const sendCreateNewSolanaAddress = async (ctx) => {
             const message = await this.walletService.createNewSolanaAddress();

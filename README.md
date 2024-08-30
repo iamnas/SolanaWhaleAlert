@@ -82,6 +82,8 @@ Once the bot is running, you can use the following commands in your Telegram cha
 - **/tokeninfo [address]**: Fetches detailed information about a specific token using its address.
 - **/help**: Lists all available commands with a brief description.
 
+You can start using the bot by following this link: [Solana Whale Alert Bot](https://t.me/jest_test_Whale_bot)
+
 ## Contributing
 
 Feel free to submit issues or pull requests if you find bugs or have suggestions for improvements.

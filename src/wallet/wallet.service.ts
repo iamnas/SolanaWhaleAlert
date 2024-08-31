@@ -116,7 +116,7 @@ export class WalletService {
         telegramMessage += `*${index + 1}. ${item.name || 'Unknown'} (${item.symbol || 'N/A'})*\n`;
         telegramMessage += `**Address**: [🅵](https://dexscreener.com/solana/${item.address})\`${item.address}\`\n`;
         telegramMessage += `**Liquidity**: ${formatValue(item.liquidity)}\n`;
-        telegramMessage += `🔗 [Quick Buy Link](https://t.me/achilles_trojanbot?start=r-naseth-${item.address})\n\n`;
+        // telegramMessage += `🔗 [Quick Buy Link](https://t.me/achilles_trojanbot?start=r-naseth-${item.address})\n\n`;
       });
 
       return telegramMessage;
@@ -257,6 +257,7 @@ export class WalletService {
 
       const riskLevel = data.score === 0 ? '🔴 *Risk:*' : '🟢 *Good*';
       const riskAnalysis = data.risks
+        .slice(0, 5)
         .map((risk) => {
           return `⚠️ *${risk.level.toUpperCase()}*: ${risk.name} - ${risk.description}`;
         })

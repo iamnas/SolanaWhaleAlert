@@ -22,8 +22,7 @@ let BotService = class BotService {
         this.alertService = alertService;
         this.walletService = walletService;
         this.userState = {};
-        this.bot = new telegraf_1.Telegraf(this.configService.get('TELEGRAM_TOKEN'));
-        this.bot.start((ctx) => {
+        this.sendWelcomeMessage = (ctx) => {
             ctx.reply('Welcome to SolanaWhaleWatch! 🚀\n\n' +
                 'Here are the commands you can use to get the latest updates and insights:\n' +
                 'Click on a button below to explore:\n', telegraf_1.Markup.inlineKeyboard([
@@ -41,8 +40,9 @@ let BotService = class BotService {
                 ],
                 [telegraf_1.Markup.button.callback('Help 💡', 'help')],
             ]));
-        });
-        const helpMessage = `Here are all the commands you can use:
+        };
+        this.sendHelpMessage = (ctx) => {
+            const helpMessage = `Here are all the commands you can use:
     /start - Welcome message and list of available commands
     /top10 - Get the top 10 tokens by market cap and trading volume
     /newlistings - Get newly listed tokens on Solana
@@ -52,123 +52,101 @@ let BotService = class BotService {
     /tokeninfo [address] - Get detailed information about a specific token by its address
     /help - Show this help message
     Stay tuned for more updates! 🚀`;
-        const sendHelpMessage = (ctx) => {
-            ctx.reply(helpMessage);
+            const helpKeyboard = telegraf_1.Markup.keyboard([
+                ['📈 top10', 'New Listings 🆕'],
+                ['🐋 whalealerts', 'Create Wallet 🏦'],
+                ['🔍 tokeninfo [address]', '💼 Wallet Portfolio 👜'],
+                ['💡 help'],
+            ])
+                .resize()
+                .oneTime();
+            ctx.reply(helpMessage, helpKeyboard);
         };
-        const sendWhaleAlert = async (ctx) => {
-            const message = await this.alertService.sendLastAlert();
-            ctx.reply(message, { parse_mode: 'Markdown' });
+        this.handleCallback = (ctx, callback) => {
+            callback(ctx);
+            ctx.answerCbQuery();
         };
-        const sendTopTokens = async (ctx) => {
-            const message = await this.walletService.getTopToken();
-            ctx.reply(message, { parse_mode: 'Markdown' });
-        };
-        const sendNewlistings = async (ctx) => {
-            const message = await this.walletService.getNewListings();
-            ctx.reply(message, { parse_mode: 'Markdown' });
-        };
-        const sendWalletPortfolio = async (ctx, wallet) => {
-            const message = await this.walletService.getWalletPortfolio(wallet);
-            ctx.reply(message, { parse_mode: 'Markdown' });
-        };
-        const sendTokenInformation = async (ctx, tokenAddress) => {
-            const sections = await this.walletService.getTokenInformation(tokenAddress);
-            ctx.reply(sections, { parse_mode: 'Markdown' });
-        };
-        const sendCreateNewSolanaAddress = async (ctx) => {
-            const message = await this.walletService.createNewSolanaAddress();
-            ctx.reply(message, { parse_mode: 'Markdown' });
-        };
-        this.bot.command('help', sendHelpMessage);
-        this.bot.command('whalealerts', (ctx) => {
-            sendWhaleAlert(ctx);
-        });
-        this.bot.command('top10', (ctx) => {
-            sendTopTokens(ctx);
-        });
-        this.bot.command('newlistings', (ctx) => {
-            sendNewlistings(ctx);
-        });
-        this.bot.command('portfolio', (ctx) => {
-            ctx.reply('Please enter your wallet address:');
-            this.userState[ctx.chat.id] = { waitingFor: 'portfolio' };
-        });
-        this.bot.command('tokeninfo', async (ctx) => {
-            ctx.reply('Please enter your token address');
-            this.userState[ctx.chat.id] = { waitingFor: 'tokeninfo' };
-        });
-        this.bot.command('createwallet', async (ctx) => {
-            sendCreateNewSolanaAddress(ctx);
-        });
-        this.bot.action('top10', (ctx) => {
-            sendTopTokens(ctx);
-            ctx.answerCbQuery();
-        });
-        this.bot.action('newlistings', (ctx) => {
-            sendNewlistings(ctx);
-            ctx.answerCbQuery();
-        });
-        this.bot.action('portfolio', (ctx) => {
-            ctx.reply('Please enter your wallet address:');
-            this.userState[ctx.chat.id] = { waitingFor: 'portfolio' };
-            ctx.answerCbQuery();
-        });
-        this.bot.action('tokeninfo', async (ctx) => {
-            ctx.reply('Please enter your token address');
-            this.userState[ctx.chat.id] = { waitingFor: 'tokeninfo' };
-            ctx.answerCbQuery();
-        });
-        this.bot.action('whalealerts', (ctx) => {
-            sendWhaleAlert(ctx);
-            ctx.answerCbQuery();
-        });
-        this.bot.action('createwallet', async (ctx) => {
-            sendCreateNewSolanaAddress(ctx);
-            ctx.answerCbQuery();
-        });
-        this.bot.action('help', (ctx) => {
-            sendHelpMessage(ctx);
-            ctx.answerCbQuery();
-        });
-        this.bot.on('message', async (ctx) => {
+        this.handleMessage = async (ctx) => {
             const userState = this.userState[ctx.chat.id];
             if (userState && ctx.message && 'text' in ctx.message) {
                 const userMessage = ctx.message.text.trim();
-                if (userState.waitingFor === 'portfolio') {
-                    if (this.isValidAddress(userMessage)) {
-                        try {
-                            await sendWalletPortfolio(ctx, userMessage);
-                        }
-                        catch (error) {
-                            ctx.reply('Error occurred while fetching the portfolio. Please try again.');
-                        }
+                const { waitingFor } = userState;
+                try {
+                    if (waitingFor === 'portfolio' && this.isValidAddress(userMessage)) {
+                        await this.sendWalletPortfolio(ctx, userMessage);
+                    }
+                    else if (waitingFor === 'tokeninfo') {
+                        await this.sendTokenInformation(ctx, userMessage);
                     }
                     else {
-                        ctx.reply('Invalid wallet address. Please try again.');
+                        ctx.reply('Invalid input. Please try again.');
                     }
-                    delete this.userState[ctx.chat.id];
                 }
-                else if (userState.waitingFor === 'tokeninfo') {
-                    try {
-                        await sendTokenInformation(ctx, userMessage);
-                    }
-                    catch (error) {
-                        ctx.reply('Error occurred while fetching token info. Please try again.');
-                    }
-                    delete this.userState[ctx.chat.id];
+                catch (error) {
+                    ctx.reply('Error occurred while processing your request. Please try again.');
                 }
+                delete this.userState[ctx.chat.id];
             }
-        });
+        };
+        this.requestWalletAddress = (ctx) => {
+            ctx.reply('Please enter your wallet address:');
+            this.userState[ctx.chat.id] = { waitingFor: 'portfolio' };
+        };
+        this.requestTokenAddress = (ctx) => {
+            ctx.reply('Please enter your token address:');
+            this.userState[ctx.chat.id] = { waitingFor: 'tokeninfo' };
+        };
+        this.sendWhaleAlert = async (ctx) => {
+            const message = await this.alertService.sendLastAlert();
+            ctx.reply(message, { parse_mode: 'Markdown' });
+        };
+        this.sendTopTokens = async (ctx) => {
+            const message = await this.walletService.getTopToken();
+            ctx.reply(message, { parse_mode: 'Markdown' });
+        };
+        this.sendNewListings = async (ctx) => {
+            const message = await this.walletService.getNewListings();
+            ctx.reply(message, { parse_mode: 'Markdown' });
+        };
+        this.sendWalletPortfolio = async (ctx, wallet) => {
+            const message = await this.walletService.getWalletPortfolio(wallet);
+            ctx.reply(message, { parse_mode: 'Markdown' });
+        };
+        this.sendTokenInformation = async (ctx, tokenAddress) => {
+            const sections = await this.walletService.getTokenInformation(tokenAddress);
+            ctx.reply(sections, { parse_mode: 'Markdown' });
+        };
+        this.sendCreateNewSolanaAddress = async (ctx) => {
+            const message = await this.walletService.createNewSolanaAddress();
+            ctx.reply(message, { parse_mode: 'Markdown' });
+        };
+        this.isValidAddress = (walletAddress) => {
+            try {
+                const address = new web3_js_1.PublicKey(walletAddress);
+                return web3_js_1.PublicKey.isOnCurve(address);
+            }
+            catch (e) {
+                return false;
+            }
+        };
+        this.bot = new telegraf_1.Telegraf(this.configService.get('TELEGRAM_TOKEN'));
+        this.bot.start((ctx) => this.sendWelcomeMessage(ctx));
+        this.bot.command('help', (ctx) => this.sendHelpMessage(ctx));
+        this.bot.command('whalealerts', (ctx) => this.sendWhaleAlert(ctx));
+        this.bot.command('top10', (ctx) => this.sendTopTokens(ctx));
+        this.bot.command('newlistings', (ctx) => this.sendNewListings(ctx));
+        this.bot.command('portfolio', (ctx) => this.requestWalletAddress(ctx));
+        this.bot.command('tokeninfo', (ctx) => this.requestTokenAddress(ctx));
+        this.bot.command('createwallet', (ctx) => this.sendCreateNewSolanaAddress(ctx));
+        this.bot.action('top10', (ctx) => this.handleCallback(ctx, this.sendTopTokens));
+        this.bot.action('newlistings', (ctx) => this.handleCallback(ctx, this.sendNewListings));
+        this.bot.action('portfolio', (ctx) => this.handleCallback(ctx, this.requestWalletAddress));
+        this.bot.action('tokeninfo', (ctx) => this.handleCallback(ctx, this.requestTokenAddress));
+        this.bot.action('whalealerts', (ctx) => this.handleCallback(ctx, this.sendWhaleAlert));
+        this.bot.action('createwallet', (ctx) => this.handleCallback(ctx, this.sendCreateNewSolanaAddress));
+        this.bot.action('help', (ctx) => this.sendHelpMessage(ctx));
+        this.bot.on('message', (ctx) => this.handleMessage(ctx));
         this.bot.launch();
-    }
-    isValidAddress(walletAddress) {
-        try {
-            const address = new web3_js_1.PublicKey(walletAddress);
-            return web3_js_1.PublicKey.isOnCurve(address);
-        }
-        catch (e) {
-            return false;
-        }
     }
 };
 exports.BotService = BotService;

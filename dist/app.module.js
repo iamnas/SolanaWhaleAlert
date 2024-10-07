@@ -15,6 +15,7 @@ const config_1 = require("@nestjs/config");
 const wallet_module_1 = require("./wallet/wallet.module");
 const bot_service_1 = require("./bot/bot.service");
 const bull_1 = require("@nestjs/bull");
+const bot_module_1 = require("./bot/bot.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -33,6 +34,7 @@ exports.AppModule = AppModule = __decorate([
             alert_module_1.AlertModule,
             config_1.ConfigModule.forRoot({ isGlobal: true }),
             wallet_module_1.WalletModule,
+            bot_module_1.BotModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, bot_service_1.BotService],

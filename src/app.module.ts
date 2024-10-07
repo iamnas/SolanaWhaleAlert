@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { WalletModule } from './wallet/wallet.module';
 import { BotService } from './bot/bot.service';
 import { BullModule } from '@nestjs/bull';
+import { BotModule } from './bot/bot.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { BullModule } from '@nestjs/bull';
     AlertModule,
     ConfigModule.forRoot({ isGlobal: true }),
     WalletModule,
+    BotModule,
   ],
   controllers: [AppController],
   providers: [AppService, BotService],

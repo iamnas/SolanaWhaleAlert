@@ -8,5 +8,17 @@ export declare class BotService {
     private bot;
     private userState;
     constructor(configService: ConfigService, alertService: AlertService, walletService: WalletService);
-    isValidAddress(walletAddress: string): boolean;
+    private sendWelcomeMessage;
+    private sendHelpMessage;
+    private handleCallback;
+    private handleMessage;
+    private requestWalletAddress;
+    private requestTokenAddress;
+    private sendWhaleAlert;
+    private sendTopTokens;
+    private sendNewListings;
+    private sendWalletPortfolio;
+    private sendTokenInformation;
+    private sendCreateNewSolanaAddress;
+    private isValidAddress;
 }

@@ -35,16 +35,15 @@ let WalletService = class WalletService {
             const topTokens = response?.data?.data?.items?.slice(0, 10);
             let telegramMessage = `*Top 10 Tokens for Wallet:* \`${wallet}\`\n\n`;
             topTokens.forEach((token, index) => {
-                telegramMessage += `*${index + 1}. ${token.symbol}* `;
-                telegramMessage += `[🅵](https://solscan.io/token/${token.address})\n`;
-                telegramMessage += `Name: \`${token.name}\`\n`;
-                telegramMessage += `Balance: \`${token.uiAmount}\`\n`;
-                telegramMessage += `Value: \`$${token.valueUsd.toFixed(2)}\`\n\n`;
+                telegramMessage += `*${index + 1}. ${token?.symbol}* `;
+                telegramMessage += `[🅵](https://solscan.io/token/${token?.address})\n`;
+                telegramMessage += `Name: \`${token?.name}\`\n`;
+                telegramMessage += `Balance: \`${token?.uiAmount}\`\n`;
+                telegramMessage += `Value: \`$${token?.valueUsd?.toFixed(2)}\`\n\n`;
             });
             return telegramMessage;
         }
         catch (error) {
-            console.error(error);
             throw new common_1.HttpException('An error occurred while fetching the data.', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

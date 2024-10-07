@@ -5,6 +5,7 @@ import { Keypair, PublicKey } from '@solana/web3.js';
 import axios from 'axios';
 import { firstValueFrom } from 'rxjs';
 import bs58 from 'bs58';
+
 @Injectable()
 export class WalletService {
   constructor(
@@ -128,80 +129,6 @@ export class WalletService {
       );
     }
   }
-
-  // async getTokenInformation(tokenAddress: string) {
-  //   try {
-  //     const response = await axios.get(
-  //       `https://api.rugcheck.xyz/v1/tokens/${tokenAddress}/report`,
-  //     );
-  //     const data = response.data;
-
-  //     const tokenPriceData = await axios.get(
-  //       `https://price.jup.ag/v4/price?ids=${tokenAddress}`,
-  //     );
-
-  //     const tokenPrice = tokenPriceData?.data?.data[tokenAddress].price || 0;
-
-  //     // Markets Section
-  //     const markets = data.markets
-  //       .map((market) => {
-  //         return (
-  //           `\n\n` +
-  //           `📈 *Market:* ${market?.marketType?.toUpperCase().replace(/_/g, '\\_')}\n` +
-  //           `💧 *LP Mint:* \`${market?.lp?.lpMint}\`\n` +
-  //           `💰 *Liquidity:* \`$${(market?.lp?.quoteUSD + market?.lp?.baseUSD).toLocaleString()}\`\n` +
-  //           `🔒 *LP Locked:* \`${market?.lp?.lpLockedPct?.toFixed(2)}%\``
-  //         );
-  //       })
-  //       .join('\n\n');
-
-  //     // Token Overview
-  //     const tokenOverview =
-  //       `*💡 Token Overview* \n` +
-  //       `* Name:* \`${data.tokenMeta.name}\`\n` +
-  //       `* Symbol:* \`${data.tokenMeta.symbol}\`\n` +
-  //       `* 🪙 Mint Address:* \`${data.mint}\`\n` +
-  //       `* 💵 Supply:* \`${(data.token.supply / Math.pow(10, data.token.decimals)).toLocaleString()} ${data.tokenMeta.symbol}\`\n` +
-  //       `* 👤 Creator:* \`${data.creator}\`\n` +
-  //       `* 🏷️ Market Cap:* \`$${(data.token.supply * tokenPrice).toLocaleString()}\`\n` +
-  //       `* 🔒 LP Locked:* \`${data.markets[0].lp.lpLockedPct.toFixed(2)}%\``;
-
-  //     // Top Holders
-  //     const topHoldersData = data.topHolders.slice(0, 5); // Get top 5 holders
-  //     const totalTopHoldersPct = topHoldersData.reduce(
-  //       (acc, holder) => acc + holder.pct,
-  //       0,
-  //     );
-
-  //     const topHolders = topHoldersData
-  //       .map((holder) => {
-  //         const ownerShort = `${holder.owner}`;
-  //         const amountInMillions = (holder.uiAmount / 1_000_000).toFixed(2);
-  //         return `*Account* \`${ownerShort}\` \n*Amount* ${amountInMillions}M  \n*Percentage* ${holder.pct.toFixed(2)}% \n`;
-  //       })
-  //       .join('\n');
-
-  //     const riskLevel = data.score === 0 ? '🔴 *Risk:*' : '🟢 *Good*';
-  //     const riskAnalysis = data.risks
-  //       .map((risk) => {
-  //         return `⚠️ *${risk.level.toUpperCase()}*: ${risk.name} - ${risk.description}`;
-  //       })
-  //       .join('\n');
-
-  //     const message =
-  //       `\n ${tokenOverview}\n\n📊 *Markets* ${markets}\n\n👥 *Top Holders* (${totalTopHoldersPct.toFixed(2)}%) \n` +
-  //       `\n${topHolders}` +
-  //       `\n🔍 *Risk Analysis* \n` +
-  //       `📊 *Status:* *${data.score}*    ${riskLevel} \n` +
-  //       `\`${riskAnalysis}\` \n`;
-  //     // Sending the message
-  //     return message;
-  //     // ctx.reply(message, { parse_mode: 'Markdown' });
-  //   } catch (error) {
-  //     console.error('Error fetching token info:', error);
-  //     return 'Failed to fetch token info. Please try again later.';
-  //   }
-  // }
 
   async getTokenInformation(tokenAddress: string) {
     try {

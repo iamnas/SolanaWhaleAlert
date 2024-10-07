@@ -6,6 +6,7 @@ export declare class BotService {
     private alertService;
     private walletService;
     private bot;
+    private userState;
     constructor(configService: ConfigService, alertService: AlertService, walletService: WalletService);
     isValidAddress(walletAddress: string): boolean;
 }

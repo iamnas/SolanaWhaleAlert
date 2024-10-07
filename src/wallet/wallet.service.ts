@@ -1,7 +1,9 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey, Connection } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token';
+
 import axios from 'axios';
 import { firstValueFrom } from 'rxjs';
 import bs58 from 'bs58';
@@ -132,6 +134,11 @@ export class WalletService {
 
   async getTokenInformation(tokenAddress: string) {
     try {
+      const token = await this.isToken(tokenAddress);
+
+      if (!token) {
+        return `Error checking token address: ${token}`;
+      }
       const response = await axios.get(
         `https://api.rugcheck.xyz/v1/tokens/${tokenAddress}/report`,
       );
@@ -199,7 +206,7 @@ export class WalletService {
 
       return sections;
     } catch (error) {
-      console.error('Error fetching token info:', error);
+      // console.error('Error fetching token info:', error);
       return 'Failed to fetch token info. Please try again later.';
     }
   }
@@ -222,6 +229,39 @@ export class WalletService {
     } catch (error) {
       console.log(error);
       return 'Something went wrong, please try again later.';
+    }
+  }
+
+  async isToken(address: string): Promise<boolean> {
+    try {
+      const connection = new Connection('https://api.mainnet-beta.solana.com');
+      const publicKey = new PublicKey(address);
+
+      // Fetch the account information
+      const accountInfo = await connection.getParsedAccountInfo(publicKey);
+
+      // Check if the account exists
+      if (!accountInfo || !accountInfo.value) {
+        return false;
+      }
+
+      const parsedData = accountInfo.value.data;
+
+      // Check if the account is a token mint for either program version
+      const isTokenProgram =
+        accountInfo.value.owner.equals(TOKEN_PROGRAM_ID) ||
+        accountInfo.value.owner.equals(TOKEN_2022_PROGRAM_ID);
+
+      // Ensure the data is of the correct type (should be parsed)
+      if (isTokenProgram && parsedData['parsed']) {
+        const type = parsedData['parsed'].type;
+        return type === 'mint';
+      }
+
+      return false;
+    } catch (error) {
+      // console.error('Error checking token address:', error);
+      return false;
     }
   }
 }

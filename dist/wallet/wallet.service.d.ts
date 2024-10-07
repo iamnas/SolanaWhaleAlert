@@ -9,4 +9,5 @@ export declare class WalletService {
     getNewListings(): Promise<string>;
     getTokenInformation(tokenAddress: string): Promise<string>;
     createNewSolanaAddress(): Promise<string>;
+    isToken(address: string): Promise<boolean>;
 }

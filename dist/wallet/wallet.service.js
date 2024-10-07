@@ -14,6 +14,7 @@ const axios_1 = require("@nestjs/axios");
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const web3_js_1 = require("@solana/web3.js");
+const spl_token_1 = require("@solana/spl-token");
 const axios_2 = require("axios");
 const rxjs_1 = require("rxjs");
 const bs58_1 = require("bs58");
@@ -113,6 +114,10 @@ let WalletService = class WalletService {
     }
     async getTokenInformation(tokenAddress) {
         try {
+            const token = await this.isToken(tokenAddress);
+            if (!token) {
+                return `Error checking token address: ${token}`;
+            }
             const response = await axios_2.default.get(`https://api.rugcheck.xyz/v1/tokens/${tokenAddress}/report`);
             const data = response.data;
             const tokenPriceData = await axios_2.default.get(`https://price.jup.ag/v4/price?ids=${tokenAddress}`);
@@ -157,7 +162,6 @@ let WalletService = class WalletService {
             return sections;
         }
         catch (error) {
-            console.error('Error fetching token info:', error);
             return 'Failed to fetch token info. Please try again later.';
         }
     }
@@ -178,6 +182,27 @@ let WalletService = class WalletService {
         catch (error) {
             console.log(error);
             return 'Something went wrong, please try again later.';
+        }
+    }
+    async isToken(address) {
+        try {
+            const connection = new web3_js_1.Connection('https://api.mainnet-beta.solana.com');
+            const publicKey = new web3_js_1.PublicKey(address);
+            const accountInfo = await connection.getParsedAccountInfo(publicKey);
+            if (!accountInfo || !accountInfo.value) {
+                return false;
+            }
+            const parsedData = accountInfo.value.data;
+            const isTokenProgram = accountInfo.value.owner.equals(spl_token_1.TOKEN_PROGRAM_ID) ||
+                accountInfo.value.owner.equals(spl_token_1.TOKEN_2022_PROGRAM_ID);
+            if (isTokenProgram && parsedData['parsed']) {
+                const type = parsedData['parsed'].type;
+                return type === 'mint';
+            }
+            return false;
+        }
+        catch (error) {
+            return false;
         }
     }
 };
